@@ -1,4 +1,4 @@
-package media.uqab.libdrivebackup;
+package media.uqab.libdrivebackup.util;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
