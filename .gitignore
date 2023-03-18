@@ -1,0 +1,69 @@
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+
+.cxx
+
+# Ignore Gradle files
+.gradle/
+build/
+/captures
+.externalNativeBuild
+./*/build/
+
+# configuration
+.iws
+.ipr
+.iml
+*.iml
+local.properties
+
+# built generated package files
+*.apk
+*.ap_
+*.aab
+app/release
+
+# the Dalvik VM files
+*.dex
+
+*.log
+*.jks
+
+# Android Studio / IntelliJ IDEA
+*.iws
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/tasks.xml
+.idea/vcs.xml
+.idea/workspace.xml
+/out/
+
+# Android Profiling
+*.hprof
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# firebase
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase-cache/
+
+# OS temparory files
+.DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
