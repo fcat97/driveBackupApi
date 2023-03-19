@@ -25,6 +25,8 @@
     public *;
 }
 
+-keep class media.uqab.libdrivebackup.model.InitializationException
+
 # Obfuscate method names
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable

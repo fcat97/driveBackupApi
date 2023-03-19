@@ -18,6 +18,8 @@ import com.google.api.services.drive.DriveScopes
 import media.uqab.libdrivebackup.model.InitializationException
 import media.uqab.libdrivebackup.useCase.CreateRootFolder
 import media.uqab.libdrivebackup.useCase.DeleteFile
+import media.uqab.libdrivebackup.useCase.GetCredential.getCredential
+import media.uqab.libdrivebackup.useCase.GetOneTapSignInIntent.getSignInIntent
 import media.uqab.libdrivebackup.useCase.ListAppData
 import media.uqab.libdrivebackup.useCase.UploadAppData
 import java.util.*
@@ -51,7 +53,7 @@ class GoogleDriveBackupManager(
      */
     private var onConsent: ((credential: GoogleAccountCredential) -> Unit)? = null
     private val consentLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val credential = getCredential(it.data)
+        val credential = getCredential(activity, it.data)
 
         if(it.resultCode == Activity.RESULT_OK && credential != null) {
             onConsent?.invoke(credential)
@@ -118,51 +120,11 @@ class GoogleDriveBackupManager(
      * if successful, otherwise null.
      */
     private fun requestConsentAndProceed(onConsent: (GoogleAccountCredential) -> Unit) {
-        val gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(credentialID)
-            .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-            .build()
-
         // set operation when user consent is approved.
         this.onConsent = onConsent
 
-        // launch consent request
-        val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(activity, gso)
-        consentLauncher.launch(googleSignInClient.signInIntent)
-    }
-
-    /**
-     * Get [GoogleAccountCredential] from [Intent] data got from user consent request.
-     */
-    private fun getCredential(data: Intent?): GoogleAccountCredential? {
-        if (data == null) return null
-
-        try {
-            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
-            val account: GoogleSignInAccount = task.getResult(ApiException::class.java)
-
-            if (BuildConfig.DEBUG) Log.i(TAG, "handleSignInResult: \n" + """
-                ${account.account}
-                ${account.id}
-                ${account.givenName}
-            """.trimIndent())
-            // Signed in successfully, show authenticated UI.
-
-            val credential: GoogleAccountCredential = GoogleAccountCredential.usingOAuth2(
-                activity,
-                Collections.singleton(DriveScopes.DRIVE_APPDATA)
-            )
-            credential.selectedAccountName = account.email
-            return credential
-        } catch (e: Exception) {
-            if(e is ApiException && e.statusCode == 10) {
-                Log.e(TAG, "Not configured properly. Maybe you used wrong credential.")
-            } else {
-                Log.e(TAG, "Failed to get credential", e)
-            }
-            return null
-        }
+        val signInIntent = getSignInIntent(activity, credentialID)
+        consentLauncher.launch(signInIntent)
     }
 
     companion object {

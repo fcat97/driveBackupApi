@@ -4,7 +4,7 @@ import android.content.Context
 import android.net.Uri
 import java.io.File
 
-object Helper {
+internal object Helper {
     fun Uri?.toFile(context: Context): File? = try {
         if (this == null) {
             null
