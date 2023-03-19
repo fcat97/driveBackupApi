@@ -1,13 +1,9 @@
 package media.uqab.libdrivebackup.useCase
 
-import android.util.Log
 import androidx.annotation.WorkerThread
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.FileContent
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.gson.GsonFactory
-import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import java.io.IOException
 

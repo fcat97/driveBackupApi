@@ -26,6 +26,7 @@
 }
 
 -keep class media.uqab.libdrivebackup.model.InitializationException
+-keep class media.uqab.libdrivebackup.model.FileInfo
 
 # Obfuscate method names
 -renamesourcefileattribute SourceFile

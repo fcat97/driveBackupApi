@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
+import media.uqab.libdrivebackup.model.Constants
 
 /**
  * Build a new authorized API client service.
@@ -14,6 +15,5 @@ internal fun getService(credentials: GoogleAccountCredential): Drive {
         NetHttpTransport(),
         GsonFactory.getDefaultInstance(),
         credentials
-    ).setApplicationName("Drive Backup Demo")
-        .build()
+    ).setApplicationName(Constants.APP_NAME).build()
 }

@@ -1,7 +1,6 @@
 package com.tos.drivebackup
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -27,7 +26,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var editText: EditText
     private lateinit var terminal: TextView
 
-    private val googleDriveBackupManager = GoogleDriveBackupManager(this, CLIENT_ID_WEB)
+    private val googleDriveBackupManager = GoogleDriveBackupManager(BuildConfig.APPLICATION_ID, this, CLIENT_ID_WEB)
 
     private val filePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
         val file = it.toFile(this) ?: return@registerForActivityResult
@@ -70,7 +69,7 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchFiles() {
         googleDriveBackupManager.getBackupIDs {
-            terminalOutput.postValue("[output]: \n" + it.joinToString(separator = "\n"))
+            terminalOutput.postValue("[output]: \n" + it.joinToString(separator = "\n") {f -> f.name + f.extension + "(${it.size} bytes)" + "--->" + f.fileID} )
         }
     }
 
