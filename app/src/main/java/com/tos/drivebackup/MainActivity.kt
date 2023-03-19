@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var editText: EditText
     private lateinit var terminal: TextView
 
-    private val googleDriveBackupManager = GoogleDriveBackupManager(this, CLIENT_ID_ANDROID)
+    private val googleDriveBackupManager = GoogleDriveBackupManager(this, CLIENT_ID_WEB)
 
     private val filePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
         val file = it.toFile(this) ?: return@registerForActivityResult

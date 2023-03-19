@@ -56,7 +56,7 @@ class GoogleDriveBackupManager(
         if(it.resultCode == Activity.RESULT_OK && credential != null) {
             onConsent?.invoke(credential)
         } else {
-            Log.w(TAG, "getUserConsent: user permission denied")
+            Log.w(TAG, "user permission denied")
         }
     }
 
@@ -69,7 +69,7 @@ class GoogleDriveBackupManager(
                 val files = ListAppData.listAppData(it)
                 activity.runOnUiThread { backups(files.files.map { f -> f.id }) }
             } catch (e: Exception) {
-                Log.e(TAG, "getBackupIDs: failed to get files", e)
+                Log.w(TAG, "failed to get files", e)
                 backups(emptyList())
             }
         }.start()
@@ -84,15 +84,19 @@ class GoogleDriveBackupManager(
                 val fileID = UploadAppData.uploadAppData(it, file, mimeType)
                 activity.runOnUiThread { onUpload(fileID) }
             } catch (e: Exception) {
-                Log.d(TAG, "handleSignInResult: ${e.message}")
+                Log.w(TAG, "failed to upload file", e)
             }
         }.start()
     }
 
     fun createRootFolder(onCreate: (String) -> Unit) = requestConsentAndProceed {
         Thread {
-            val folderID = CreateRootFolder.create(it)
-            activity.runOnUiThread { onCreate(folderID) }
+            try {
+                val folderID = CreateRootFolder.create(it)
+                activity.runOnUiThread { onCreate(folderID) }
+            } catch (e: Exception) {
+                Log.w(TAG, "failed to create root folder", e)
+            }
         }.start()
     }
 
@@ -102,7 +106,7 @@ class GoogleDriveBackupManager(
                 DeleteFile.delete(it, fileID)
                 activity.runOnUiThread { onDelete() }
             } catch (e: Exception) {
-                Log.e(TAG, "deleteFile: failed to delete file $fileID", e)
+                Log.w(TAG, "failed to delete file $fileID", e)
             }
         }.start()
     }
@@ -138,8 +142,7 @@ class GoogleDriveBackupManager(
             val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
             val account: GoogleSignInAccount = task.getResult(ApiException::class.java)
 
-            Log.i(
-                TAG, "handleSignInResult: \n" + """
+            if (BuildConfig.DEBUG) Log.i(TAG, "handleSignInResult: \n" + """
                 ${account.account}
                 ${account.id}
                 ${account.givenName}
@@ -153,6 +156,11 @@ class GoogleDriveBackupManager(
             credential.selectedAccountName = account.email
             return credential
         } catch (e: Exception) {
+            if(e is ApiException && e.statusCode == 10) {
+                Log.e(TAG, "Not configured properly. Maybe you used wrong credential.")
+            } else {
+                Log.e(TAG, "Failed to get credential", e)
+            }
             return null
         }
     }

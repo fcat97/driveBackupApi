@@ -18,7 +18,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -43,15 +43,16 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:20.4.1'
 }
 
+
 // for maven-publish plugin
 afterEvaluate {
     publishing {
         publications {
             maven(MavenPublication) {
-                group = 'media.uqab'
+                group = 'media.uqab.driveBackupApi'
                 version = '1.0.0'
                 artifactId = "driveBackupApi"
-                from components.release
+                from components.debug
 
                 pom {
                     developers {
