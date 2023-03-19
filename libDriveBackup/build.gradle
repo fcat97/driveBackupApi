@@ -18,7 +18,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -52,7 +52,7 @@ afterEvaluate {
                 group = 'media.uqab.driveBackupApi'
                 version = '1.0.0'
                 artifactId = "driveBackupApi"
-                from components.debug
+                from components.release
 
                 pom {
                     developers {

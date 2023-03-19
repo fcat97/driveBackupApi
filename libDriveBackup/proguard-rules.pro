@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep only the GoogleDriveBackupManager class
+-keep class media.uqab.libdrivebackup.GoogleDriveBackupManager {
+    public *;
+}
+
+# Obfuscate method names
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
+-keepclassmembers class media.uqab.libdrivebackup.GoogleDriveBackupManager {
+    public *;
+}
