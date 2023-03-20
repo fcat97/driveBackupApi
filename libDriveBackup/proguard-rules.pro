@@ -27,7 +27,9 @@
 
 -keep class media.uqab.libdrivebackup.model.InitializationException
 -keep class media.uqab.libdrivebackup.model.UserPermissionDeniedException
--dontobfuscate class media.uqab.libdrivebackup.model.FileInfo
+-keep class media.uqab.libdrivebackup.model.FileInfo {
+    *;
+}
 
 # Obfuscate method names
 -renamesourcefileattribute SourceFile
