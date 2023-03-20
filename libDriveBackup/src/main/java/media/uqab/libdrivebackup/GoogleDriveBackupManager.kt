@@ -97,10 +97,16 @@ class GoogleDriveBackupManager(
                         webLink = it.webContentLink
                     )
                 }
-                activity.runOnUiThread { backups(files) }
+
+                activity.runOnUiThread {
+                    backups(files)
+                }
             } catch (e: Exception) {
-                onFailed?.invoke(e)
                 Log.w(TAG, "failed to get files", e)
+
+                activity.runOnUiThread {
+                    onFailed?.invoke(e)
+                }
             }
         }.start()
     }
@@ -117,10 +123,15 @@ class GoogleDriveBackupManager(
         Thread {
             try {
                 val fileID = UploadAppData.uploadAppData(it, file, mimeType)
-                activity.runOnUiThread { onUpload(fileID) }
+
+                activity.runOnUiThread {
+                    onUpload(fileID)
+                }
             } catch (e: Exception) {
-                onFailed?.invoke(e)
                 Log.w(TAG, "failed to upload file", e)
+                activity.runOnUiThread {
+                    onFailed?.invoke(e)
+                }
             }
         }.start()
     }
@@ -147,10 +158,15 @@ class GoogleDriveBackupManager(
 
                 baOs.writeTo(fos)
 
-                onDownload(outputFile)
+                activity.runOnUiThread {
+                    onDownload(outputFile)
+                }
             } catch (e: Exception) {
-                onFailed?.invoke(e)
                 Log.w(TAG, "Failed to download file: $fileID", e)
+
+                activity.runOnUiThread {
+                    onFailed?.invoke(e)
+                }
             } finally {
                 fos.close()
             }
@@ -170,10 +186,15 @@ class GoogleDriveBackupManager(
         Thread {
             try {
                 val folderID = CreateRootFolder.create(it)
-                activity.runOnUiThread { onCreate(folderID) }
+                activity.runOnUiThread {
+                    onCreate(folderID)
+                }
             } catch (e: Exception) {
-                onFailed?.invoke(e)
                 Log.w(TAG, "failed to create root folder", e)
+
+                activity.runOnUiThread {
+                    onFailed?.invoke(e)
+                }
             }
         }.start()
     }
@@ -192,9 +213,13 @@ class GoogleDriveBackupManager(
         Thread {
             try {
                 DeleteFile.delete(it, fileID)
-                activity.runOnUiThread { onDelete() }
+                activity.runOnUiThread {
+                    onDelete()
+                }
             } catch (e: Exception) {
-                onFailed?.invoke(e)
+                activity.run {
+                    onFailed?.invoke(e)
+                }
                 Log.w(TAG, "failed to delete file $fileID", e)
             }
         }.start()
