@@ -10,12 +10,16 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import media.uqab.libdrivebackup.model.Constants
 import media.uqab.libdrivebackup.model.FileInfo
 import media.uqab.libdrivebackup.model.InitializationException
+import media.uqab.libdrivebackup.model.UserPermissionDeniedException
+import media.uqab.libdrivebackup.useCase.*
 import media.uqab.libdrivebackup.useCase.CreateRootFolder
 import media.uqab.libdrivebackup.useCase.DeleteFile
 import media.uqab.libdrivebackup.useCase.GetCredential.getCredential
-import media.uqab.libdrivebackup.useCase.GetOneTapSignInIntent.getSignInIntent
 import media.uqab.libdrivebackup.useCase.GetFiles
+import media.uqab.libdrivebackup.useCase.GetOneTapSignInIntent.getSignInIntent
 import media.uqab.libdrivebackup.useCase.UploadAppData
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
 
 /**
@@ -53,12 +57,22 @@ class GoogleDriveBackupManager(
      * each operation.
      */
     private var onConsent: ((credential: GoogleAccountCredential) -> Unit)? = null
+
+    /**
+     * Run this block when any operation is failed.
+     */
+    private var onFailed: ((msg: Exception) -> Unit)? = null
+
+    /**
+     * Launcher for user consent
+     */
     private val consentLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         val credential = getCredential(activity, it.data)
 
         if(it.resultCode == Activity.RESULT_OK && credential != null) {
             onConsent?.invoke(credential)
         } else {
+            onFailed?.invoke(UserPermissionDeniedException())
             Log.w(TAG, "user permission denied")
         }
     }
@@ -66,7 +80,10 @@ class GoogleDriveBackupManager(
     /**
      * Fetch latest 10 backup file IDs. Returns an empty list if any exception occurs.
      */
-    fun getBackupIDs(backups: (List<FileInfo>) -> Unit) = requestConsentAndProceed {
+    fun getBackupIDs(
+        onFailed: ((Exception) -> Unit)? = null,
+        backups: (List<FileInfo>) -> Unit
+    ) = requestConsentAndProceed(onFailed) {
         Thread {
             try {
                 val files = GetFiles.getFiles(it).files.map {
@@ -76,13 +93,14 @@ class GoogleDriveBackupManager(
                         extension = if (it.fileExtension != null) { it.fileExtension } else { "" },
                         mimeType = if (it.mimeType != null) it.mimeType else "",
                         lastModified = if (it.modifiedTime == null) null else Date(it.modifiedTime.value),
-                        size = it.getSize() ?: 0
+                        size = it.getSize() ?: 0,
+                        webLink = it.webContentLink
                     )
                 }
                 activity.runOnUiThread { backups(files) }
             } catch (e: Exception) {
+                onFailed?.invoke(e)
                 Log.w(TAG, "failed to get files", e)
-                backups(emptyList())
             }
         }.start()
     }
@@ -90,13 +108,51 @@ class GoogleDriveBackupManager(
     /**
      * Upload a [java.io.File] to google drive's app specific folder.
      */
-    fun uploadFile(file: java.io.File, mimeType: String, onUpload: (fileID: String) -> Unit) = requestConsentAndProceed {
+    fun uploadFile(
+        file: File,
+        mimeType: String,
+        onFailed: ((Exception) -> Unit)? = null,
+        onUpload: (fileID: String) -> Unit
+    ) = requestConsentAndProceed(onFailed) {
         Thread {
             try {
                 val fileID = UploadAppData.uploadAppData(it, file, mimeType)
                 activity.runOnUiThread { onUpload(fileID) }
             } catch (e: Exception) {
+                onFailed?.invoke(e)
                 Log.w(TAG, "failed to upload file", e)
+            }
+        }.start()
+    }
+
+    /**
+     * Download a file.
+     *
+     * @param fileID Google drive's file id. To get all uploaded files use [getBackupIDs].
+     * @param outputFile file where the output will be written. Must be accessible by user, such as
+     * app's owned directory in SD card.
+     * @param onDownload response when the file is completely downloaded and written to [outputFile].
+     * @param onFailed called when this operations fails.
+     */
+    fun downloadFile(
+        fileID: String,
+        outputFile: File,
+        onFailed: ((Exception) -> Unit)? = null,
+        onDownload: (File) -> Unit
+    ) = requestConsentAndProceed(onFailed) {
+        Thread {
+            val fos = FileOutputStream(outputFile)
+            try {
+                val baOs = DownloadFile.downloadFile(it, fileID)
+
+                baOs.writeTo(fos)
+
+                onDownload(outputFile)
+            } catch (e: Exception) {
+                onFailed?.invoke(e)
+                Log.w(TAG, "Failed to download file: $fileID", e)
+            } finally {
+                fos.close()
             }
         }.start()
     }
@@ -107,12 +163,16 @@ class GoogleDriveBackupManager(
      * ---
      * **Experimental api**
      */
-    fun createRootFolder(onCreate: (String) -> Unit) = requestConsentAndProceed {
+    fun createRootFolder(
+        onFailed: ((Exception) -> Unit)? = null,
+        onCreate: (String) -> Unit
+    ) = requestConsentAndProceed(onFailed) {
         Thread {
             try {
                 val folderID = CreateRootFolder.create(it)
                 activity.runOnUiThread { onCreate(folderID) }
             } catch (e: Exception) {
+                onFailed?.invoke(e)
                 Log.w(TAG, "failed to create root folder", e)
             }
         }.start()
@@ -124,12 +184,17 @@ class GoogleDriveBackupManager(
      * @param fileID file id to delete.
      * @param onDelete callback to invoke when file is deleted successfully.
      */
-    fun deleteFile(fileID: String, onDelete: () -> Unit) = requestConsentAndProceed {
+    fun deleteFile(
+        fileID: String,
+        onFailed: ((Exception) -> Unit)? = null,
+        onDelete: () -> Unit
+    ) = requestConsentAndProceed(onFailed) {
         Thread {
             try {
                 DeleteFile.delete(it, fileID)
                 activity.runOnUiThread { onDelete() }
             } catch (e: Exception) {
+                onFailed?.invoke(e)
                 Log.w(TAG, "failed to delete file $fileID", e)
             }
         }.start()
@@ -141,9 +206,15 @@ class GoogleDriveBackupManager(
      * @param onConsent action to do when user permission is granted. This returns a [Intent] object
      * if successful, otherwise null.
      */
-    private fun requestConsentAndProceed(onConsent: (GoogleAccountCredential) -> Unit) {
+    private fun requestConsentAndProceed(
+        onFailed: ((Exception) -> Unit)? = null,
+        onConsent: (GoogleAccountCredential) -> Unit
+    ) {
         // set operation when user consent is approved.
         this.onConsent = onConsent
+
+        // set operation when operation fails
+        this.onFailed = onFailed
 
         val signInIntent = getSignInIntent(activity, credentialID)
         consentLauncher.launch(signInIntent)

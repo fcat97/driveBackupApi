@@ -12,4 +12,5 @@ data class FileInfo(
     val mimeType: String,
     val lastModified: Date?,
     val size: Long,
+    val webLink: String?,
 )

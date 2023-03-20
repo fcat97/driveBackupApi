@@ -7,7 +7,7 @@ import com.google.api.services.drive.model.FileList
 import java.io.IOException
 
 /**
- * Class to demonstrate use-case of list 10 files in the application data folder.
+ * Class to list 10 files in the application data folder.
  */
 internal object GetFiles {
     /**

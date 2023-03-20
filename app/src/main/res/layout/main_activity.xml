@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- Main content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,6 +45,14 @@
             android:hint="file id"/>
 
         <Button
+            android:id="@+id/downloadButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Download File"
+            android:layout_marginVertical="8dp"
+            style="@style/MaterialAlertDialog.Material3"/>
+
+        <Button
             android:id="@+id/deleteButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,6 +62,7 @@
     </LinearLayout>
 
 
+    <!-- Terminal -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
