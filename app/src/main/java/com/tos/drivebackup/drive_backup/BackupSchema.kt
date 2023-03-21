@@ -2,7 +2,6 @@ package com.tos.drivebackup.drive_backup
 
 import android.content.Context
 import android.util.Log
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.tos.drivebackup.BuildConfig
@@ -14,13 +13,18 @@ import java.util.*
 
 internal object BackupSchema {
     private const val TAG = "Schema"
+    const val CURRENT_BACKUP_SCHEMA_VER = 1
 
     internal fun getBackupFile(context: Context): File? {
-        val backup = getForAppVersion93(context)
+        // current build version is 94. Make sure to change accordingly in future release
+        val backup = when(CURRENT_BACKUP_SCHEMA_VER) {
+            1 -> getForSchemaVer1(context)
+            else -> null
+        } ?: return null // return if schema version not matched.
 
         val today = with(SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.ENGLISH)) { format(Date()) }
         val data = GsonBuilder().setPrettyPrinting().create().toJson(backup, Backup::class.java)
-        val file = File(context.cacheDir, "backup_app${BuildConfig.VERSION_CODE}_$today.json")
+        val file = File(context.cacheDir, "backup_schema${CURRENT_BACKUP_SCHEMA_VER}_$today.json")
 
         return try {
             val fos = FileOutputStream(file)
@@ -40,7 +44,7 @@ internal object BackupSchema {
         return Backup(92, JsonObject())
     }
 
-    private fun getForAppVersion93(context: Context): Backup {
+    private fun getForSchemaVer1(context: Context): Backup {
 
         val backupData = JsonObject().apply {
             addProperty("is_touch_enabled", true)

@@ -64,12 +64,19 @@ class GoogleDriveBackupManager(
     private var onFailed: ((msg: Exception) -> Unit)? = null
 
     /**
+     * Verified [GoogleAccountCredential].
+     */
+    private var credential: GoogleAccountCredential? = null
+
+    /**
      * Launcher for user consent
      */
     private val consentLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         val credential = getCredential(activity, it.data)
 
         if(it.resultCode == Activity.RESULT_OK && credential != null) {
+            this.credential = credential // update credential
+
             onConsent?.invoke(credential)
         } else {
             onFailed?.invoke(UserPermissionDeniedException())
@@ -235,6 +242,12 @@ class GoogleDriveBackupManager(
         onFailed: ((Exception) -> Unit)? = null,
         onConsent: (GoogleAccountCredential) -> Unit
     ) {
+        // use previous credential
+        if (credential != null) {
+            onConsent(credential!!)
+            return
+        }
+
         // set operation when user consent is approved.
         this.onConsent = onConsent
 

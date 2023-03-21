@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import com.tos.drivebackup.BuildConfig
+import com.tos.drivebackup.drive_backup.BackupSchema.CURRENT_BACKUP_SCHEMA_VER
 import com.tos.drivebackup.drive_backup.BackupSchema.getBackupFile
 import media.uqab.libdrivebackup.GoogleDriveBackupManager
 import media.uqab.libdrivebackup.model.FileInfo
@@ -62,18 +63,7 @@ object DriveBackupUtils {
             response("[restore]:\n$it")
 
             val lastBackUp = it.filter { f ->
-                isValidBackupFile(f.name)
-            }.filter { f ->
-                val version = getBackupVersion(f.name)
-
-                response("restoreBackup: $version")
-
-                if (version == 0) {
-                    false
-                } else {
-                    // filter backup that are equal or below current app version
-                    version <= BuildConfig.VERSION_CODE
-                }
+                isValidBackupFile(f.name) && getBackupVersion(f.name) == CURRENT_BACKUP_SCHEMA_VER
             }.maxByOrNull { f -> getBackupTime(f.name) }
 
             if (lastBackUp == null) {
@@ -99,7 +89,16 @@ object DriveBackupUtils {
                         val json = Gson().fromJson(reader, Backup::class.java)
                         response("[backup downloaded]:\n$json")
 
-                        response("backup restored successfully")
+                        val success = when(getBackupVersion(f.name)) {
+                            1 -> Restore.restoreForSchemaVer1(context, json)
+                            else -> false
+                        }
+
+                        if (success) {
+                            response("backup restored successfully")
+                        } else {
+                            response("something went wrong.")
+                        }
                     } catch (e: Exception) {
                         response("failed to restore")
                     }
@@ -122,7 +121,7 @@ object DriveBackupUtils {
     }
 
     private fun isValidBackupFile(fileName: String): Boolean {
-        return "backup_app\\d+_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}.json".toRegex().containsMatchIn(fileName)
+        return "backup_schema\\d+_\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}.json".toRegex().containsMatchIn(fileName)
     }
     private fun getBackupTime(fileName: String): Long {
         val date = "\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}".toRegex().find(fileName)?.value ?: return 0
@@ -130,7 +129,7 @@ object DriveBackupUtils {
         return sdf.parse(date)?.time ?: 0
     }
     private fun getBackupVersion(fileName: String): Int {
-        return "_app\\d+".toRegex().find(fileName)?.value?.drop("_app".length)?.toIntOrNull() ?: 0
+        return "backup_schema\\d+".toRegex().find(fileName)?.value?.drop("backup_schema".length)?.toIntOrNull() ?: 0
     }
 
     private const val TAG = "DriveBackupUtils"
