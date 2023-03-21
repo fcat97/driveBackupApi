@@ -9,8 +9,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.MutableLiveData
+import com.tos.drivebackup.drive_backup.DriveBackupUtils
 import media.uqab.libdrivebackup.GoogleDriveBackupManager
-import media.uqab.libdrivebackup.util.Helper.toFile
 import java.io.File
 
 class MainActivity : ComponentActivity() {
@@ -19,25 +19,32 @@ class MainActivity : ComponentActivity() {
         private const val CLIENT_ID_WEB = "109876320882-22lsfuhmi4cpjhiolke0eb5ngg61rhve.apps.googleusercontent.com"
         private const val CLIENT_ID_ANDROID = "109876320882-llmhgsaqpablpupq0b443unnmjtiidek.apps.googleusercontent.com"
         private const val MIME_TYPE: String = "application/json"
-        val terminalOutput = MutableLiveData("")
     }
-
+    private val terminalOutputLiveData = MutableLiveData("")
+    
     private lateinit var rootFolderButton: Button
     private lateinit var sendButton: Button
     private lateinit var fetchButton: Button
     private lateinit var deleteButton: Button
     private lateinit var downloadButton: Button
+    private lateinit var downloadDemoBackupButton: Button
+    private lateinit var createDemoBackupButton: Button
     private lateinit var editText: EditText
     private lateinit var terminal: TextView
 
-    private val googleDriveBackupManager = GoogleDriveBackupManager(BuildConfig.APPLICATION_ID, this, CLIENT_ID_WEB)
+    private val googleDriveBackupManager = GoogleDriveBackupManager(
+        appID = BuildConfig.APPLICATION_ID,
+        activity = this,
+        credentialID = CLIENT_ID_WEB
+    )
 
     private val filePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
-        val file = it.toFile(this) ?: return@registerForActivityResult
+        printToTerminal("disabled for now")
+        /*val file = it.toFile(this) ?: return@registerForActivityResult
 
         googleDriveBackupManager.uploadFile(file, MIME_TYPE) { path ->
-            terminalOutput.postValue("[output]: \n$path")
-        }
+            printToTerminal("[output]: \n$path")
+        }*/
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,13 +55,18 @@ class MainActivity : ComponentActivity() {
         sendButton = findViewById(R.id.sendButton)
         fetchButton = findViewById(R.id.fetchButton)
         downloadButton = findViewById(R.id.downloadButton)
+        downloadDemoBackupButton = findViewById(R.id.downloadDemoButton)
+        createDemoBackupButton = findViewById(R.id.createDemoBackupButton)
         deleteButton = findViewById(R.id.deleteButton)
         editText = findViewById(R.id.edit_text)
         terminal = findViewById(R.id.terminal)
 
+        createDemoBackupButton.setOnClickListener { createDemoBackup() }
+        downloadDemoBackupButton.setOnClickListener { downloadDemoBackup() }
+
         rootFolderButton.setOnClickListener {
             googleDriveBackupManager.createRootFolder {
-                terminalOutput.postValue(it)
+                printToTerminal(it)
             }
         }
         sendButton.setOnClickListener { startSendFlow() }
@@ -68,12 +80,11 @@ class MainActivity : ComponentActivity() {
                 fileID = fileID,
                 outputFile = outputFile,
                 onFailed = {
+                    printToTerminal(it.message)
                     Log.e(TAG, "onCreate: download filed", it)
                 },
                 onDownload = {
-                    terminalOutput.postValue(
-                        "[output]: \n" + it.name + "-->" + it.path
-                    )
+                    printToTerminal(it.name + "-->" + it.path)
                     Log.d(TAG, "onCreate: ${it.exists()}")
                 }
             )
@@ -89,16 +100,33 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        terminalOutput.observe(this) { terminal.text = it }
-    }
-
-    private fun fetchFiles() {
-        googleDriveBackupManager.getBackupIDs {
-            terminalOutput.postValue("[output]: \n" + it.joinToString(separator = "\n") {f -> f.name + f.extension + "(${it.size} bytes)" + "--->" + f.fileID + " " + f.webLink} )
-        }
+        terminalOutputLiveData.observe(this) { terminal.text = it }
     }
 
     private fun startSendFlow() {
         filePicker.launch(arrayOf(MIME_TYPE))
+    }
+
+    private fun fetchFiles() {
+        googleDriveBackupManager.getBackupIDs {
+            printToTerminal("[backups]: \n" + it.joinToString(separator = "\n"))
+        }
+    }
+
+    private fun createDemoBackup() {
+        DriveBackupUtils.backupToDrive(this, googleDriveBackupManager) {
+            printToTerminal(it)
+        }
+    }
+
+    private fun downloadDemoBackup() {
+        DriveBackupUtils.restoreBackup(this, googleDriveBackupManager) {
+            printToTerminal(it)
+        }
+    }
+    
+    private fun printToTerminal(msg: String?) {
+        val newOutput = msg + "\n\n" + (terminalOutputLiveData.value ?: "")
+        terminalOutputLiveData.value = newOutput
     }
 }

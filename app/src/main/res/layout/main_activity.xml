@@ -5,62 +5,83 @@
     android:orientation="vertical">
 
     <!-- Main content -->
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/buttonsScrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="0dp"
         android:layout_above="@id/scrollView"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical">
-        <Button
-            android:id="@+id/createFolderButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create Root Folder"
-            android:layout_marginVertical="8dp"
-            style="@style/MaterialAlertDialog.Material3" />
-
-        <Button
-            android:id="@+id/sendButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Send Data"
-            android:layout_marginVertical="8dp"
-            style="@style/MaterialAlertDialog.Material3" />
-
-        <Button
-            android:id="@+id/fetchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Fetch Data"
-            android:layout_marginVertical="8dp"
-            style="@style/MaterialAlertDialog.Material3"/>
-
-        <EditText
-            android:id="@+id/edit_text"
+        android:layout_alignParentTop="true">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="60dp"
-            android:layout_marginVertical="8dp"
-            android:hint="file id"/>
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/downloadButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Download File"
-            android:layout_marginVertical="8dp"
-            style="@style/MaterialAlertDialog.Material3"/>
+            <Button
+                android:id="@+id/createDemoBackupButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create demo backup"
+                android:layout_marginVertical="8dp"
+                style="@style/MaterialAlertDialog.Material3"/>
 
-        <Button
-            android:id="@+id/deleteButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Delete File"
-            android:layout_marginVertical="8dp"
-            style="@style/MaterialAlertDialog.Material3"/>
-    </LinearLayout>
+            <Button
+                android:id="@+id/downloadDemoButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Download demo Backup"
+                android:layout_marginVertical="8dp"
+                style="@style/MaterialAlertDialog.Material3"/>
 
+            <Button
+                android:id="@+id/createFolderButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create Root Folder"
+                android:layout_marginVertical="8dp"
+                style="@style/MaterialAlertDialog.Material3" />
+
+            <Button
+                android:id="@+id/sendButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send Data"
+                android:layout_marginVertical="8dp"
+                style="@style/MaterialAlertDialog.Material3" />
+
+            <Button
+                android:id="@+id/fetchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fetch Data"
+                android:layout_marginVertical="8dp"
+                style="@style/MaterialAlertDialog.Material3"/>
+
+            <EditText
+                android:id="@+id/edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="60dp"
+                android:layout_marginVertical="8dp"
+                android:hint="file id"/>
+
+            <Button
+                android:id="@+id/downloadButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Download File"
+                android:layout_marginVertical="8dp"
+                style="@style/MaterialAlertDialog.Material3"/>
+
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete File"
+                android:layout_marginVertical="8dp"
+                style="@style/MaterialAlertDialog.Material3"/>
+        </LinearLayout>
+    </ScrollView>
 
     <!-- Terminal -->
     <ScrollView

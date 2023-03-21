@@ -30,6 +30,7 @@
 -keep class media.uqab.libdrivebackup.model.FileInfo {
     *;
 }
+-keep class com.google.** { *;}
 
 # Obfuscate method names
 -renamesourcefileattribute SourceFile
