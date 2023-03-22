@@ -12,12 +12,8 @@ import media.uqab.libdrivebackup.model.FileInfo
 import media.uqab.libdrivebackup.model.InitializationException
 import media.uqab.libdrivebackup.model.UserPermissionDeniedException
 import media.uqab.libdrivebackup.useCase.*
-import media.uqab.libdrivebackup.useCase.CreateRootFolder
-import media.uqab.libdrivebackup.useCase.DeleteFile
 import media.uqab.libdrivebackup.useCase.GetCredential.getCredential
-import media.uqab.libdrivebackup.useCase.GetFiles
 import media.uqab.libdrivebackup.useCase.GetOneTapSignInIntent.getSignInIntent
-import media.uqab.libdrivebackup.useCase.UploadAppData
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*

@@ -33,7 +33,7 @@ object DriveBackupUtils {
                 file = file,
                 mimeType = "application/json",
                 onFailed = {
-                    response("failed to save backup! ${it.stackTrace}")
+                    response("failed to save backup! ${it.message}")
                     Log.e(TAG, "backupToDrive: failed to save backup!", it)
                 }
             ) { fileID ->
@@ -51,7 +51,7 @@ object DriveBackupUtils {
     ) {
         backupManager.getBackupIDs(
             onFailed = {
-                response("failed to restore backup ${it.message}")
+                response("failed to restore backup ${it.stackTraceToString()}")
             }
         ) {
             if (it.isEmpty()) {

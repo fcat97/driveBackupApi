@@ -16,7 +16,6 @@ internal object BackupSchema {
     const val CURRENT_BACKUP_SCHEMA_VER = 1
 
     internal fun getBackupFile(context: Context): File? {
-        // current build version is 94. Make sure to change accordingly in future release
         val backup = when(CURRENT_BACKUP_SCHEMA_VER) {
             1 -> getForSchemaVer1(context)
             else -> null
@@ -40,8 +39,8 @@ internal object BackupSchema {
     // ----------------- demo --------------------- //
     // keep each backup version in separate method, this record will make the debug process easy.
     // also write a restore method in [Restore] class for this version.
-    private fun getForAppVersion92(context: Context): Backup {
-        return Backup(92, JsonObject())
+    private fun getForSchemaVer0(context: Context): Backup {
+        return Backup(0, JsonObject())
     }
 
     private fun getForSchemaVer1(context: Context): Backup {
@@ -55,6 +54,6 @@ internal object BackupSchema {
             addProperty("reciter", "maher")
         }
 
-        return Backup(BuildConfig.VERSION_CODE, backupData)
+        return Backup(1, backupData)
     }
 }

@@ -1,5 +1,6 @@
 package media.uqab.libdrivebackup.useCase
 
+import android.accounts.AccountManager
 import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -26,10 +27,14 @@ internal object GetCredential {
             val account: GoogleSignInAccount = task.getResult(ApiException::class.java)
 
             if (BuildConfig.DEBUG) Log.i(
-                TAG, "handleSignInResult: \n" + """
+                TAG, "getCredential: \n" + """
                 ${account.account}
                 ${account.id}
                 ${account.givenName}
+                ${account.displayName}
+                ${account.requestedScopes}
+                ${account.serverAuthCode}
+                ${data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)}
             """.trimIndent())
             // Signed in successfully, show authenticated UI.
 
