@@ -9,9 +9,15 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.MutableLiveData
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.textfield.TextInputEditText
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.tos.drivebackup.drive_backup.Backup
 import com.tos.drivebackup.drive_backup.DriveBackupUtils
 import media.uqab.libdrivebackup.GoogleDriveBackupManager
 import java.io.File
+import java.io.FileReader
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -29,7 +35,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var downloadButton: Button
     private lateinit var downloadDemoBackupButton: Button
     private lateinit var createDemoBackupButton: Button
-    private lateinit var editText: EditText
+    private lateinit var clearTerminalButton: Button
+    private lateinit var editText: TextInputEditText
     private lateinit var terminal: TextView
 
     private val googleDriveBackupManager = GoogleDriveBackupManager(
@@ -49,6 +56,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DynamicColors.applyToActivitiesIfAvailable(this.application)
         setContentView(R.layout.main_activity)
 
         rootFolderButton = findViewById(R.id.createFolderButton)
@@ -57,6 +65,7 @@ class MainActivity : ComponentActivity() {
         downloadButton = findViewById(R.id.downloadButton)
         downloadDemoBackupButton = findViewById(R.id.downloadDemoButton)
         createDemoBackupButton = findViewById(R.id.createDemoBackupButton)
+        clearTerminalButton = findViewById(R.id.clearTerminalButton)
         deleteButton = findViewById(R.id.deleteButton)
         editText = findViewById(R.id.edit_text)
         terminal = findViewById(R.id.terminal)
@@ -71,25 +80,7 @@ class MainActivity : ComponentActivity() {
         }
         sendButton.setOnClickListener { startSendFlow() }
         fetchButton.setOnClickListener { fetchFiles() }
-        downloadButton.setOnClickListener {
-            val fileID = editText.text.toString()
-            if (fileID.isEmpty() || fileID == "null") return@setOnClickListener
-
-            val outputFile = File(getExternalFilesDir(null), "backup.json")
-            googleDriveBackupManager.downloadFile(
-                fileID = fileID,
-                outputFile = outputFile,
-                onFailed = {
-                    printToTerminal(it.message)
-                    Log.e(TAG, "onCreate: download filed", it)
-                },
-                onDownload = {
-                    printToTerminal(it.name + "-->" + it.path)
-                    Log.d(TAG, "onCreate: ${it.exists()}")
-                }
-            )
-
-        }
+        downloadButton.setOnClickListener { downloadFile() }
         deleteButton.setOnClickListener {
             val fileID = editText.text.toString()
             if (fileID.isEmpty() || fileID == "null") return@setOnClickListener
@@ -99,6 +90,7 @@ class MainActivity : ComponentActivity() {
                 fetchFiles()
             }
         }
+        clearTerminalButton.setOnClickListener { terminalOutputLiveData.value = "" }
 
         terminalOutputLiveData.observe(this) { terminal.text = it }
     }
@@ -108,8 +100,32 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun fetchFiles() {
-        googleDriveBackupManager.getBackupIDs {
+        googleDriveBackupManager.getFiles {
             printToTerminal("[backups]: \n" + it.joinToString(separator = "\n"))
+        }
+    }
+
+    private fun downloadFile() {
+        val fileID = editText.text.toString()
+        if (fileID.isEmpty() || fileID == "null") return
+
+        googleDriveBackupManager.getFile(
+            fileID = fileID,
+            onFailed = { printToTerminal(it.message) }
+        ) { info ->
+            val outputFile = File(getExternalFilesDir(null), info.name)
+
+            googleDriveBackupManager.downloadFile(
+                fileID = fileID,
+                outputFile = outputFile,
+                onFailed = {
+                    printToTerminal(it.message)
+                    Log.e(TAG, "onCreate: download filed", it)
+                },
+                onDownload = { f ->
+                    printToTerminal("[downloaded]:\n${FileReader(f).readText()}")
+                }
+            )
         }
     }
 

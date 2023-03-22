@@ -81,9 +81,9 @@ class GoogleDriveBackupManager(
     }
 
     /**
-     * Fetch latest 10 backup file IDs. Returns an empty list if any exception occurs.
+     * Fetch latest 10 uploaded file IDs.
      */
-    fun getBackupIDs(
+    fun getFiles(
         onFailed: ((Exception) -> Unit)? = null,
         backups: (List<FileInfo>) -> Unit
     ) = requestConsentAndProceed(onFailed) {
@@ -107,6 +107,41 @@ class GoogleDriveBackupManager(
             } catch (e: Exception) {
                 Log.w(TAG, "failed to get files", e)
 
+                activity.runOnUiThread {
+                    onFailed?.invoke(e)
+                }
+            }
+        }.start()
+    }
+
+    /**
+     * Get [FileInfo] of [fileID] if exists, otherwise [onFailed] is called.
+     *
+     * @param fileID id of file to query
+     * @param onFailed called if any error occurs
+     * @param result queried file's [FileInfo].
+     */
+    fun getFile(
+        fileID: String,
+        onFailed: ((Exception) -> Unit)? = null,
+        result: (FileInfo) -> Unit
+    ) = requestConsentAndProceed(onFailed) { c ->
+        Thread {
+            try {
+                val file = GetFile.getFile(fileID, c).let {
+                    FileInfo(
+                        fileID = it.id,
+                        name = it.name,
+                        extension = if (it.fileExtension != null) { it.fileExtension } else { "" },
+                        mimeType = if (it.mimeType != null) it.mimeType else "",
+                        lastModified = if (it.modifiedTime == null) null else Date(it.modifiedTime.value),
+                        size = it.getSize() ?: 0,
+                        webLink = it.webContentLink
+                    )
+                }
+
+                activity.runOnUiThread { result(file) }
+            } catch (e: Exception) {
                 activity.runOnUiThread {
                     onFailed?.invoke(e)
                 }
@@ -142,7 +177,7 @@ class GoogleDriveBackupManager(
     /**
      * Download a file.
      *
-     * @param fileID Google drive's file id. To get all uploaded files use [getBackupIDs].
+     * @param fileID Google drive's file id. To get all uploaded files use [getFiles].
      * @param outputFile file where the output will be written. Must be accessible by user, such as
      * app's owned directory in SD card.
      * @param onDownload response when the file is completely downloaded and written to [outputFile].
@@ -250,6 +285,7 @@ class GoogleDriveBackupManager(
         // set operation when operation fails
         this.onFailed = onFailed
 
+        // request for user permission
         val signInIntent = getSignInIntent(activity, credentialID)
         consentLauncher.launch(signInIntent)
     }

@@ -17,69 +17,84 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/createDemoBackupButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Create demo backup"
                 android:layout_marginVertical="8dp"
-                style="@style/MaterialAlertDialog.Material3"/>
+                style="@style/ButtonTheme"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/downloadDemoButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Download demo Backup"
                 android:layout_marginVertical="8dp"
-                style="@style/MaterialAlertDialog.Material3"/>
+                style="@style/ButtonTheme"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/createFolderButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Create Root Folder"
                 android:layout_marginVertical="8dp"
-                style="@style/MaterialAlertDialog.Material3" />
+                style="@style/ButtonTheme" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/sendButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Send Data"
                 android:layout_marginVertical="8dp"
-                style="@style/MaterialAlertDialog.Material3" />
+                style="@style/ButtonTheme" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/fetchButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Fetch Data"
                 android:layout_marginVertical="8dp"
-                style="@style/MaterialAlertDialog.Material3"/>
+                style="@style/ButtonTheme"/>
 
-            <EditText
-                android:id="@+id/edit_text"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="60dp"
-                android:layout_marginVertical="8dp"
-                android:hint="file id"/>
+                style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="60dp"
+                    android:layout_marginVertical="8dp"
+                    style="@style/Widget.Material3.TextInputEditText.FilledBox.Dense"
+                    android:hint="file id"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/downloadButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Download File"
                 android:layout_marginVertical="8dp"
-                style="@style/MaterialAlertDialog.Material3"/>
+                style="@style/ButtonTheme"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/deleteButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Delete File"
                 android:layout_marginVertical="8dp"
-                style="@style/MaterialAlertDialog.Material3"/>
+                style="@style/ButtonTheme"/>
+            
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/clearTerminalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear Terminal"
+                android:layout_marginVertical="8dp"
+                style="@style/ButtonTheme"/>
         </LinearLayout>
     </ScrollView>
 

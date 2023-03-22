@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
-import com.tos.drivebackup.BuildConfig
 import com.tos.drivebackup.drive_backup.BackupSchema.CURRENT_BACKUP_SCHEMA_VER
 import com.tos.drivebackup.drive_backup.BackupSchema.getBackupFile
 import media.uqab.libdrivebackup.GoogleDriveBackupManager
@@ -49,14 +48,14 @@ object DriveBackupUtils {
         backupManager: GoogleDriveBackupManager,
         response: (String) -> Unit
     ) {
-        backupManager.getBackupIDs(
+        backupManager.getFiles(
             onFailed = {
                 response("failed to restore backup ${it.stackTraceToString()}")
             }
         ) {
             if (it.isEmpty()) {
                 response("No backup found")
-                return@getBackupIDs
+                return@getFiles
             }
 
             // log
@@ -68,7 +67,7 @@ object DriveBackupUtils {
 
             if (lastBackUp == null) {
                 response("no backup found to restore")
-                return@getBackupIDs
+                return@getFiles
             }
 
             response(lastBackUp.toString())
