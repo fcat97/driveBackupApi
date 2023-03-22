@@ -1,5 +1,6 @@
 package media.uqab.libdrivebackup
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.util.Log
@@ -63,6 +64,15 @@ class GoogleDriveBackupManager(
      * Verified [GoogleAccountCredential].
      */
     private var credential: GoogleAccountCredential? = null
+
+    private val accountRequestLauncher = activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            val signInIntent = getSignInIntent(activity, credentialID)
+            consentLauncher.launch(signInIntent)
+        } else {
+            onFailed?.invoke(UserPermissionDeniedException())
+        }
+    }
 
     /**
      * Launcher for user consent
@@ -285,9 +295,12 @@ class GoogleDriveBackupManager(
         // set operation when operation fails
         this.onFailed = onFailed
 
+        // request get contact permission
+        accountRequestLauncher.launch(Manifest.permission.GET_ACCOUNTS)
+
         // request for user permission
-        val signInIntent = getSignInIntent(activity, credentialID)
-        consentLauncher.launch(signInIntent)
+        /*val signInIntent = getSignInIntent(activity, credentialID)
+        consentLauncher.launch(signInIntent)*/
     }
 
     companion object {

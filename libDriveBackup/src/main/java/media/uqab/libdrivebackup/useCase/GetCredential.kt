@@ -13,6 +13,7 @@ import com.google.api.services.drive.DriveScopes
 import media.uqab.libdrivebackup.BuildConfig
 import java.util.*
 
+
 internal object GetCredential {
     private const val TAG = "GetCredential"
 
@@ -36,14 +37,13 @@ internal object GetCredential {
                 ${account.serverAuthCode}
                 ${data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)}
             """.trimIndent())
-            // Signed in successfully, show authenticated UI.
 
-            val credential: GoogleAccountCredential = GoogleAccountCredential.usingOAuth2(
+            return GoogleAccountCredential.usingOAuth2(
                 activity,
                 Collections.singleton(DriveScopes.DRIVE_APPDATA)
-            )
-            credential.selectedAccountName = account.email
-            return credential
+            ).apply {
+                selectedAccountName = account.email
+            }
         } catch (e: Exception) {
             if(e is ApiException && e.statusCode == 10) {
                 Log.e(TAG, "Not configured properly. Maybe you used wrong credential.")

@@ -15,5 +15,6 @@ internal fun getService(credentials: GoogleAccountCredential): Drive {
         AndroidHttp.newCompatibleTransport() /*NetHttpTransport()*/,
         GsonFactory.getDefaultInstance(),
         credentials
-    ).setApplicationName(Constants.APP_NAME).build()
+    ).setApplicationName(Constants.APP_NAME)
+        .build()
 }
