@@ -1,6 +1,5 @@
 package media.uqab.libdrivebackup.useCase
 
-import android.accounts.AccountManager
 import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -12,7 +11,6 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.services.drive.DriveScopes
 import media.uqab.libdrivebackup.BuildConfig
 import java.util.*
-
 
 internal object GetCredential {
     private const val TAG = "GetCredential"
@@ -34,16 +32,16 @@ internal object GetCredential {
                 ${account.givenName}
                 ${account.displayName}
                 ${account.requestedScopes}
-                ${account.serverAuthCode}
-                ${data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)}
             """.trimIndent())
 
-            return GoogleAccountCredential.usingOAuth2(
+            val credential = GoogleAccountCredential.usingOAuth2(
                 activity,
                 Collections.singleton(DriveScopes.DRIVE_APPDATA)
             ).apply {
-                selectedAccountName = account.email
+                selectedAccount = account.account
             }
+
+            return credential
         } catch (e: Exception) {
             if(e is ApiException && e.statusCode == 10) {
                 Log.e(TAG, "Not configured properly. Maybe you used wrong credential.")

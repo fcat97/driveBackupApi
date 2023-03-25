@@ -95,7 +95,7 @@ class GoogleDriveBackupManager(
      */
     fun getFiles(
         onFailed: ((Exception) -> Unit)? = null,
-        backups: (List<FileInfo>) -> Unit
+        result: (List<FileInfo>) -> Unit
     ) = requestConsentAndProceed(onFailed) {
         Thread {
             try {
@@ -112,7 +112,7 @@ class GoogleDriveBackupManager(
                 }
 
                 activity.runOnUiThread {
-                    backups(files)
+                    result(files)
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "failed to get files", e)
@@ -296,11 +296,11 @@ class GoogleDriveBackupManager(
         this.onFailed = onFailed
 
         // request get contact permission
-        accountRequestLauncher.launch(Manifest.permission.GET_ACCOUNTS)
+        // accountRequestLauncher.launch(Manifest.permission.GET_ACCOUNTS)
 
         // request for user permission
-        /*val signInIntent = getSignInIntent(activity, credentialID)
-        consentLauncher.launch(signInIntent)*/
+        val signInIntent = getSignInIntent(activity, credentialID)
+        consentLauncher.launch(signInIntent)
     }
 
     companion object {
