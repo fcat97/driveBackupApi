@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var terminal: TextView
     private lateinit var emailTextView: TextView
     private lateinit var signOutButton: Button
+    private lateinit var signInButton: Button
 
     private val googleDriveBackupManager = GoogleDriveBackupManager(
         appID = BuildConfig.APPLICATION_ID,
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity() {
         terminal = findViewById(R.id.terminal)
         emailTextView = findViewById(R.id.emailTextView)
         signOutButton = findViewById(R.id.signOutButton)
+        signInButton = findViewById(R.id.signInButton)
 
         createDemoBackupButton.setOnClickListener { createDemoBackup() }
         downloadDemoBackupButton.setOnClickListener { downloadDemoBackup() }
@@ -90,6 +92,7 @@ class MainActivity : ComponentActivity() {
                 fetchFiles()
             }
         }
+        signInButton.setOnClickListener { singIn() }
         signOutButton.setOnClickListener { signOut() }
         clearTerminalButton.setOnClickListener { terminalOutputLiveData.value = "" }
 
@@ -152,6 +155,15 @@ class MainActivity : ComponentActivity() {
             },
             currentUser = {
                 emailTextView.text = "${it.name}\n${it.email}"
+            }
+        )
+    }
+
+    private fun singIn() {
+        googleDriveBackupManager.signIn(
+            onFailed = null,
+            onSuccess = {
+                printToTerminal(it.toString())
             }
         )
     }

@@ -121,6 +121,14 @@
                 tools:text="Example\nexample@gmail.com"/>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/signInButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign Out"
+                android:layout_marginVertical="8dp"
+                style="@style/ThemeOverlay.Material3.Button.ElevatedButton"/>
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/signOutButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

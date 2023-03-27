@@ -294,6 +294,15 @@ class GoogleDriveBackupManager(
         }
     }
 
+    fun signIn(
+        onFailed: ((Exception) -> Unit)?,
+        onSuccess: (UserInfo) -> Unit
+    ) = requestConsentAndProceed(onFailed) {
+        val info = GetSignedInEmail.getSignedInEmail(activity)
+        if (info != null) onSuccess(info)
+        else onFailed?.invoke(Exception(""))
+    }
+
     /**
      * Request for User Consent to grant access to his/her drive account.
      *
