@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity() {
         terminalOutputLiveData.observe(this) { terminal.text = it }
 
         getCurrentEmail()
+        printToTerminal("[Welcome to drive backup]:")
     }
 
     private fun startSendFlow() {

@@ -3,15 +3,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            app:titleTextColor="@color/white"
+            app:title="Drive Backup"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
 
     <!-- Main content -->
     <ScrollView
         android:id="@+id/buttonsScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_above="@id/scrollView"
-        android:layout_alignParentTop="true">
+        android:layout_below="@id/appbar"
+        android:layout_above="@id/scrollView">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
