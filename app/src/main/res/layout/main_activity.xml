@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <!-- Main content -->
@@ -95,6 +96,23 @@
                 android:text="Clear Terminal"
                 android:layout_marginVertical="8dp"
                 style="@style/ButtonTheme"/>
+
+            <TextView
+                android:id="@+id/emailTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp"
+                android:gravity="center_horizontal"
+                android:layout_gravity="center_horizontal"
+                tools:text="Example\nexample@gmail.com"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/signOutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign Out"
+                android:layout_marginVertical="8dp"
+                style="@style/ThemeOverlay.Material3.Button.ElevatedButton"/>
         </LinearLayout>
     </ScrollView>
 

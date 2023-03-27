@@ -34,6 +34,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var clearTerminalButton: Button
     private lateinit var editText: TextInputEditText
     private lateinit var terminal: TextView
+    private lateinit var emailTextView: TextView
+    private lateinit var signOutButton: Button
 
     private val googleDriveBackupManager = GoogleDriveBackupManager(
         appID = BuildConfig.APPLICATION_ID,
@@ -65,6 +67,8 @@ class MainActivity : ComponentActivity() {
         deleteButton = findViewById(R.id.deleteButton)
         editText = findViewById(R.id.edit_text)
         terminal = findViewById(R.id.terminal)
+        emailTextView = findViewById(R.id.emailTextView)
+        signOutButton = findViewById(R.id.signOutButton)
 
         createDemoBackupButton.setOnClickListener { createDemoBackup() }
         downloadDemoBackupButton.setOnClickListener { downloadDemoBackup() }
@@ -86,9 +90,12 @@ class MainActivity : ComponentActivity() {
                 fetchFiles()
             }
         }
+        signOutButton.setOnClickListener { signOut() }
         clearTerminalButton.setOnClickListener { terminalOutputLiveData.value = "" }
 
         terminalOutputLiveData.observe(this) { terminal.text = it }
+
+        getCurrentEmail()
     }
 
     private fun startSendFlow() {
@@ -135,6 +142,30 @@ class MainActivity : ComponentActivity() {
         DriveBackupUtils.restoreBackup(this, googleDriveBackupManager) {
             printToTerminal(it)
         }
+    }
+
+    private fun getCurrentEmail() {
+        googleDriveBackupManager.getCurrentUser(
+            onFailed = {
+                Log.d(TAG, "setCurrentUser failed ${it.message}")
+            },
+            currentUser = {
+                emailTextView.text = "${it.name}\n${it.email}"
+            }
+        )
+    }
+
+    private fun signOut() {
+        googleDriveBackupManager.signOut(
+            onFailed = {
+                printToTerminal("signOut failed ${it.message}")
+                Log.d(TAG, "signOut failed ${it.message}")
+            },
+            onSuccess = {
+                printToTerminal("signOut successful")
+                Log.d(TAG, "signOut successful")
+            }
+        )
     }
     
     private fun printToTerminal(msg: String?) {

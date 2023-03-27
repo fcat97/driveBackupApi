@@ -27,9 +27,9 @@
 
 -keep class media.uqab.libdrivebackup.model.InitializationException
 -keep class media.uqab.libdrivebackup.model.UserPermissionDeniedException
--keep class media.uqab.libdrivebackup.model.FileInfo {
-    *;
-}
+-keep class media.uqab.libdrivebackup.model.NoUserFoundException
+-keep class media.uqab.libdrivebackup.model.FileInfo { *;}
+-keep class media.uqab.libdrivebackup.model.UserInfo { *;}
 -keep class com.google.** { *;}
 
 # Obfuscate method names

@@ -8,10 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.Lifecycle
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import media.uqab.libdrivebackup.model.*
 import media.uqab.libdrivebackup.model.Constants
-import media.uqab.libdrivebackup.model.FileInfo
-import media.uqab.libdrivebackup.model.InitializationException
-import media.uqab.libdrivebackup.model.UserPermissionDeniedException
 import media.uqab.libdrivebackup.useCase.*
 import media.uqab.libdrivebackup.useCase.GetCredential.getCredential
 import media.uqab.libdrivebackup.useCase.GetOneTapSignInIntent.getSignInIntent
@@ -64,15 +62,6 @@ class GoogleDriveBackupManager(
      * Verified [GoogleAccountCredential].
      */
     private var credential: GoogleAccountCredential? = null
-
-    private val accountRequestLauncher = activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) {
-            val signInIntent = getSignInIntent(activity, credentialID)
-            consentLauncher.launch(signInIntent)
-        } else {
-            onFailed?.invoke(UserPermissionDeniedException())
-        }
-    }
 
     /**
      * Launcher for user consent
@@ -273,6 +262,38 @@ class GoogleDriveBackupManager(
         }.start()
     }
 
+    fun signOut(
+        onFailed: ((Exception) -> Unit)?,
+        onSuccess: () -> Unit
+    ) {
+        try {
+            SignOutUser.signOut(activity, credentialID)
+            credential = null
+            onSuccess()
+        } catch (e: Exception) {
+            onFailed?.invoke(e)
+        }
+    }
+
+    /**
+     * Get currently logged in email if present
+     *
+     * @param currentUser lambda to return current logged in email address
+     * @param onFailed [NoUserFoundException] will be sent if no user found
+     */
+    fun getCurrentUser(
+        onFailed: ((Exception) -> Unit)?,
+        currentUser: (userInfo: UserInfo) -> Unit
+    ) {
+        try {
+            val info = GetSignedInEmail.getSignedInEmail(activity)
+            if (info != null) currentUser(info)
+            else onFailed?.invoke(NoUserFoundException())
+        } catch (e: Exception) {
+            onFailed?.invoke(e)
+        }
+    }
+
     /**
      * Request for User Consent to grant access to his/her drive account.
      *
@@ -294,9 +315,6 @@ class GoogleDriveBackupManager(
 
         // set operation when operation fails
         this.onFailed = onFailed
-
-        // request get contact permission
-        // accountRequestLauncher.launch(Manifest.permission.GET_ACCOUNTS)
 
         // request for user permission
         val signInIntent = getSignInIntent(activity, credentialID)
