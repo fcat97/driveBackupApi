@@ -7,13 +7,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.MutableLiveData
+import androidx.multidex.BuildConfig
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.textfield.TextInputEditText
 import com.tos.drivebackup.drive_backup.DriveBackupUtils
 import media.uqab.libdrivebackup.GoogleDriveBackupManager
 import java.io.File
 import java.io.FileReader
+import java.util.concurrent.Executors
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -57,6 +60,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         DynamicColors.applyToActivitiesIfAvailable(this.application)
         setContentView(R.layout.main_activity)
+
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
         rootFolderButton = findViewById(R.id.createFolderButton)
         sendButton = findViewById(R.id.sendButton)
@@ -108,7 +113,7 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchFiles() {
         googleDriveBackupManager.getFiles {
-            printToTerminal("[backups]: \n" + it.joinToString(separator = "\n"))
+            printToTerminal("[backups]: \n" + it.joinToString(separator = "\n\n"))
         }
     }
 

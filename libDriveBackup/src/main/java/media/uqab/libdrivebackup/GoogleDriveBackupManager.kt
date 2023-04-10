@@ -1,21 +1,23 @@
 package media.uqab.libdrivebackup
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import media.uqab.libdrivebackup.model.*
-import media.uqab.libdrivebackup.model.Constants
 import media.uqab.libdrivebackup.useCase.*
 import media.uqab.libdrivebackup.useCase.GetCredential.getCredential
 import media.uqab.libdrivebackup.useCase.GetOneTapSignInIntent.getSignInIntent
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * A manager class to view, update, delete and modify
@@ -34,18 +36,32 @@ import java.util.*
 class GoogleDriveBackupManager(
     appID: String,
     private val activity: ComponentActivity,
-    private val credentialID: String,
+    private val credentialID: String
 ) {
     init {
         if (activity.lifecycle.currentState != Lifecycle.State.INITIALIZED) {
             throw InitializationException("Must initialize before OnStart but initialized in ${activity.lifecycle.currentState}")
         }
 
+        // attach an observer to cancel all running executor services
+        activity.lifecycle.addObserver(object : LifecycleEventObserver {
+            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                if (event == Lifecycle.Event.ON_DESTROY) {
+                    _executor?.shutdown()
+                }
+            }
+        })
+
         if (credentialID.isBlank()) throw InitializationException("Credential ID not provided")
         if (appID.isEmpty()) throw InitializationException("App Name not provided")
 
         Constants.APP_NAME = appID
     }
+
+    /**
+     * A single threaded executor to run all the background tasks
+     */
+    private var _executor: ExecutorService? = null
 
     /**
      * Run this block when user grants drive uses permission. Must be set before
@@ -86,7 +102,7 @@ class GoogleDriveBackupManager(
         onFailed: ((Exception) -> Unit)? = null,
         result: (List<FileInfo>) -> Unit
     ) = requestConsentAndProceed(onFailed) {
-        Thread {
+        execute(onFailed) {
             try {
                 val files = GetFiles.getFiles(it).files.map {
                     FileInfo(
@@ -110,7 +126,7 @@ class GoogleDriveBackupManager(
                     onFailed?.invoke(e)
                 }
             }
-        }.start()
+        }
     }
 
     /**
@@ -125,7 +141,7 @@ class GoogleDriveBackupManager(
         onFailed: ((Exception) -> Unit)? = null,
         result: (FileInfo) -> Unit
     ) = requestConsentAndProceed(onFailed) { c ->
-        Thread {
+        execute(onFailed) {
             try {
                 val file = GetFile.getFile(fileID, c).let {
                     FileInfo(
@@ -145,7 +161,7 @@ class GoogleDriveBackupManager(
                     onFailed?.invoke(e)
                 }
             }
-        }.start()
+        }
     }
 
     /**
@@ -157,7 +173,7 @@ class GoogleDriveBackupManager(
         onFailed: ((Exception) -> Unit)? = null,
         onUpload: (fileID: String) -> Unit
     ) = requestConsentAndProceed(onFailed) {
-        Thread {
+        execute(onFailed) {
             try {
                 val fileID = UploadAppData.uploadAppData(it, file, mimeType)
 
@@ -170,7 +186,7 @@ class GoogleDriveBackupManager(
                     onFailed?.invoke(e)
                 }
             }
-        }.start()
+        }
     }
 
     /**
@@ -188,7 +204,7 @@ class GoogleDriveBackupManager(
         onFailed: ((Exception) -> Unit)? = null,
         onDownload: (File) -> Unit
     ) = requestConsentAndProceed(onFailed) {
-        Thread {
+        execute(onFailed) {
             val fos = FileOutputStream(outputFile)
             try {
                 val baOs = DownloadFile.downloadFile(it, fileID)
@@ -207,7 +223,7 @@ class GoogleDriveBackupManager(
             } finally {
                 fos.close()
             }
-        }.start()
+        }
     }
 
     /**
@@ -220,7 +236,7 @@ class GoogleDriveBackupManager(
         onFailed: ((Exception) -> Unit)? = null,
         onCreate: (String) -> Unit
     ) = requestConsentAndProceed(onFailed) {
-        Thread {
+        execute(onFailed) {
             try {
                 val folderID = CreateRootFolder.create(it)
                 activity.runOnUiThread {
@@ -233,7 +249,7 @@ class GoogleDriveBackupManager(
                     onFailed?.invoke(e)
                 }
             }
-        }.start()
+        }
     }
 
     /**
@@ -247,7 +263,7 @@ class GoogleDriveBackupManager(
         onFailed: ((Exception) -> Unit)? = null,
         onDelete: () -> Unit
     ) = requestConsentAndProceed(onFailed) {
-        Thread {
+        execute(onFailed) {
             try {
                 DeleteFile.delete(it, fileID)
                 activity.runOnUiThread {
@@ -259,7 +275,7 @@ class GoogleDriveBackupManager(
                 }
                 Log.w(TAG, "failed to delete file $fileID", e)
             }
-        }.start()
+        }
     }
 
     fun signOut(
@@ -328,6 +344,27 @@ class GoogleDriveBackupManager(
         // request for user permission
         val signInIntent = getSignInIntent(activity, credentialID)
         consentLauncher.launch(signInIntent)
+    }
+
+    /**
+     * Execute the task on the executor.
+     *
+     */
+    private fun execute(onFailed: ((Exception) -> Unit)?, task: Runnable) {
+        try {
+            getExecutor().submit(task)
+        } catch (e: Exception) {
+            activity.runOnUiThread {
+                onFailed?.invoke(e)
+            }
+        }
+    }
+
+    private fun getExecutor(): ExecutorService {
+        if (_executor == null) _executor = Executors.newSingleThreadExecutor()
+        else if (_executor!!.isTerminated) _executor = Executors.newSingleThreadExecutor()
+
+        return _executor!!
     }
 
     companion object {
