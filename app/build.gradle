@@ -55,5 +55,5 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
 
     implementation project(':libDriveBackup')
-//    implementation 'com.github.fcat97:driveBackupApi:1.0.6'
+//    implementation 'com.github.fcat97:driveBackupApi:1.0.7'
 }
