@@ -56,7 +56,7 @@ afterEvaluate {
         publications {
             maven(MavenPublication) {
                 group = 'media.uqab.driveBackupApi'
-                version = '1.0.7'
+                version = '1.0.8'
                 artifactId = "driveBackupApi"
                 from components.release
 
