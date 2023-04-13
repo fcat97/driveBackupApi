@@ -7,6 +7,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.textfield.TextInputEditText
@@ -58,6 +59,8 @@ class MainActivity : ComponentActivity() {
         DynamicColors.applyToActivitiesIfAvailable(this.application)
         setContentView(R.layout.main_activity)
 
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+
         rootFolderButton = findViewById(R.id.createFolderButton)
         sendButton = findViewById(R.id.sendButton)
         fetchButton = findViewById(R.id.fetchButton)
@@ -108,7 +111,8 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchFiles() {
         googleDriveBackupManager.getFiles {
-            printToTerminal("[backups]: \n" + it.joinToString(separator = "\n"))
+            Log.d(TAG, "fetchFiles: ${it.joinToString(separator = "\n")}")
+            printToTerminal("[backups]: \n" + it.joinToString(separator = "\n\n"))
         }
     }
 

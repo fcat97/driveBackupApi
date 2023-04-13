@@ -2,7 +2,6 @@ package com.tos.drivebackup.drive_backup
 
 import android.content.Context
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import com.tos.drivebackup.drive_backup.BackupSchema.CURRENT_BACKUP_SCHEMA_VER
 import com.tos.drivebackup.drive_backup.BackupSchema.getBackupFile
@@ -12,10 +11,8 @@ import java.io.File
 import java.io.FileReader
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.List
 
 object DriveBackupUtils {
-    @RequiresApi(api = 21)
     fun backupToDrive(
         context: Context,
         backupManager: GoogleDriveBackupManager,
@@ -42,7 +39,6 @@ object DriveBackupUtils {
         }
     }
 
-    @RequiresApi(api = 21)
     fun restoreBackup(
         context: Context,
         backupManager: GoogleDriveBackupManager,

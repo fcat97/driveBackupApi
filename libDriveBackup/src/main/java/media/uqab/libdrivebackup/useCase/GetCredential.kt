@@ -44,7 +44,7 @@ internal object GetCredential {
             return credential
         } catch (e: Exception) {
             if(e is ApiException && e.statusCode == 10) {
-                Log.e(TAG, "Not configured properly. Maybe you used wrong credential.")
+                Log.e(TAG, "GCP not configured properly. Maybe you used wrong credential ID or wrong SHA-1.")
             } else {
                 Log.e(TAG, "Failed to get credential", e)
             }

@@ -9,7 +9,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        minSdk 21
+        minSdk 19
         targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -35,12 +35,18 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.documentfile:documentfile:1.0.1'
 
-    implementation 'com.google.api-client:google-api-client:2.2.0'
-    implementation 'com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0'
-    implementation 'com.google.auth:google-auth-library-oauth2-http:1.16.0'
+    implementation('com.google.api-client:google-api-client:2.2.0')
+    implementation('com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0')
+    implementation('com.google.auth:google-auth-library-oauth2-http:1.16.0')
+    implementation('com.google.api-client:google-api-client-android:2.2.0')
+    implementation('com.google.android.gms:play-services-auth:20.5.0')
 
-    implementation 'com.google.api-client:google-api-client-android:2.2.0'
-    implementation 'com.google.android.gms:play-services-auth:20.4.1'
+    // https://stackoverflow.com/a/71085378/8229399
+    implementation("com.google.guava:guava") {
+        version {
+            strictly '31.1-android'
+        }
+    }
 }
 
 
@@ -50,7 +56,7 @@ afterEvaluate {
         publications {
             maven(MavenPublication) {
                 group = 'media.uqab.driveBackupApi'
-                version = '1.0.5'
+                version = '1.0.8'
                 artifactId = "driveBackupApi"
                 from components.release
 
