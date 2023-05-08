@@ -15,6 +15,9 @@ import com.tos.drivebackup.drive_backup.DriveBackupUtils
 import media.uqab.libdrivebackup.GoogleDriveBackupManager
 import java.io.File
 import java.io.FileReader
+import java.io.PrintWriter
+import java.io.StringWriter
+
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -24,7 +27,7 @@ class MainActivity : ComponentActivity() {
         private const val MIME_TYPE: String = "application/json"
     }
     private val terminalOutputLiveData = MutableLiveData("")
-    
+
     private lateinit var rootFolderButton: Button
     private lateinit var sendButton: Button
     private lateinit var fetchButton: Button
@@ -34,6 +37,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var createDemoBackupButton: Button
     private lateinit var clearTerminalButton: Button
     private lateinit var editText: TextInputEditText
+    private lateinit var credentialEditText: TextInputEditText
     private lateinit var terminal: TextView
     private lateinit var emailTextView: TextView
     private lateinit var signOutButton: Button
@@ -70,6 +74,7 @@ class MainActivity : ComponentActivity() {
         clearTerminalButton = findViewById(R.id.clearTerminalButton)
         deleteButton = findViewById(R.id.deleteButton)
         editText = findViewById(R.id.edit_text)
+        credentialEditText = findViewById(R.id.credential_edit_text)
         terminal = findViewById(R.id.terminal)
         emailTextView = findViewById(R.id.emailTextView)
         signOutButton = findViewById(R.id.signOutButton)
@@ -164,12 +169,27 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun singIn() {
-        googleDriveBackupManager.signIn(
-            onFailed = null,
-            onSuccess = {
-                printToTerminal(it.toString())
-            }
-        )
+        val credentialID = credentialEditText.text
+        if (!credentialID.isNullOrBlank()) {
+            googleDriveBackupManager.signInWith(
+                credentialID.toString(),
+                onFailed = {
+                    printToTerminal("Failed to signIn with $credentialID: ${it.message}\n\n${it.toStringStrace()}")
+                },
+                onSuccess = {
+                    printToTerminal(it.toString())
+                }
+            )
+        } else {
+            googleDriveBackupManager.signIn(
+                onFailed = {
+                    printToTerminal("Failed to signIn: ${it.message}\n\n${it.toStringStrace()}")
+                },
+                onSuccess = {
+                    printToTerminal(it.toString())
+                }
+            )
+        }
     }
 
     private fun signOut() {
@@ -184,7 +204,16 @@ class MainActivity : ComponentActivity() {
             }
         )
     }
-    
+
+    private fun Exception.toStringStrace(): String {
+        val writer = StringWriter()
+        val printWriter = PrintWriter(writer)
+        printStackTrace(printWriter)
+        printWriter.flush()
+
+        return writer.toString()
+    }
+
     private fun printToTerminal(msg: String?) {
         val newOutput = msg + "\n\n" + (terminalOutputLiveData.value ?: "")
         terminalOutputLiveData.value = newOutput

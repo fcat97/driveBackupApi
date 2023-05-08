@@ -111,6 +111,26 @@
                 android:layout_marginVertical="8dp"
                 style="@style/ButtonTheme"/>
 
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginTop="12dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/credential_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="60dp"
+                    android:layout_marginVertical="8dp"
+                    style="@style/Widget.Material3.TextInputEditText.FilledBox.Dense"
+                    android:hint="Web app Credential"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
             <TextView
                 android:id="@+id/emailTextView"
                 android:layout_width="wrap_content"

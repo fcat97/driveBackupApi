@@ -26,6 +26,8 @@ import java.util.concurrent.Executors
  * @param appID Name of the application that's using it i.e. com.example.app.
  * @param activity [ComponentActivity] or any of it's subclasses to handle all operations.
  * @param credentialID "Web application's" Client ID from "OAuth 2.0 Client IDs".
+ * @param signInCredentialID An optional "Web application's" Client ID from GCP "OAuth 2.0 Client IDs"
+ * used specifically for sign-in only. If it's null, [credentialID] will be used.
  *
  * @throws InitializationException if this class is initialized after [Lifecycle.State.STARTED].
  *
@@ -36,7 +38,8 @@ import java.util.concurrent.Executors
 class GoogleDriveBackupManager(
     appID: String,
     private val activity: ComponentActivity,
-    private val credentialID: String
+    private val credentialID: String,
+    private val signInCredentialID: String? = null
 ) {
     init {
         if (activity.lifecycle.currentState != Lifecycle.State.INITIALIZED) {
@@ -310,10 +313,36 @@ class GoogleDriveBackupManager(
         }
     }
 
+    /**
+     * Sign-in a user with required permission to backup files into user's google drive.
+     */
     fun signIn(
         onFailed: ((Exception) -> Unit)?,
         onSuccess: (UserInfo) -> Unit
-    ) = requestConsentAndProceed(onFailed) {
+    ) {
+        if (signInCredentialID == null) {
+            requestConsentAndProceed(onFailed) {
+                val info = GetSignedInEmail.getSignedInEmail(activity)
+                if (info != null) onSuccess(info)
+                else onFailed?.invoke(Exception(""))
+            }
+        } else {
+            signInWith(credentialID, onFailed, onSuccess)
+        }
+    }
+
+    /**
+     * Sign in user with any specific [credentialID].
+     *
+     * @param credentialID WEB_APPLICATION credential ID from Google Cloud Project Console.
+     * @param onFailed lambda function to invoke when any error occur
+     * @param onSuccess returns [UserInfo] when the request is successful.
+     */
+    fun signInWith(
+        credentialID: String,
+        onFailed: ((Exception) -> Unit)?,
+        onSuccess: (UserInfo) -> Unit
+    ) = requestConsentWith(credentialID, onFailed) {
         val info = GetSignedInEmail.getSignedInEmail(activity)
         if (info != null) onSuccess(info)
         else onFailed?.invoke(Exception(""))
@@ -335,6 +364,26 @@ class GoogleDriveBackupManager(
             return
         }
 
+        // set operation when user consent is approved.
+        this.onConsent = onConsent
+
+        // set operation when operation fails
+        this.onFailed = onFailed
+
+        // request for user permission
+        val signInIntent = getSignInIntent(activity, credentialID)
+        consentLauncher.launch(signInIntent)
+    }
+
+    /**
+     * **Experimental**
+     * Request user consent with any specific [credentialID].
+     */
+    private fun requestConsentWith(
+        credentialID: String,
+        onFailed: ((Exception) -> Unit)?,
+        onConsent: (GoogleAccountCredential) -> Unit
+    ) {
         // set operation when user consent is approved.
         this.onConsent = onConsent
 
